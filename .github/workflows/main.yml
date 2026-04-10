@@ -1,0 +1,42 @@
+name: Deploy Mork to Google VM
+
+on:
+  workflow_dispatch: # This enables the manual "Run workflow" button
+
+jobs:
+  deploy:
+    # Only allow the specific user bones-bones to trigger deployment
+    if: github.actor == 'bones-bones'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Authenticate with Google Cloud using WIF
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+# 2. Deploy via SSH
+      - id: 'ssh'
+        uses: 'google-github-actions/ssh-compute@v1'
+        with:
+          instance_name: ${{ secrets.INSTANCE_NAME }}
+          zone: ${{ secrets.INSTANCE_ZONE }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            git fetch --all
+            git reset --hard origin/main
+            echo "fetched" >> log.txt
+            if [ -f requirements.txt ]; then
+              pip3 install -r requirements.txt --break-system-packages
+            fi
+            sudo systemctl restart mork
