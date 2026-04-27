@@ -27,10 +27,25 @@ class GeneralCog(commands.Cog):
                 file.write(log)
                 log = ""
                 print("log dumped")
-
+    
+    #to use as a ping command and check if bot is online
     @commands.command()
     async def ai(self, ctx: commands.Context):
         await ctx.send("¡ai caramba!")
+
+    #for the funnies
+    @commands.command(name="ch!ai")
+    async def chai(self, ctx: commands.Context):
+        await ctx.send("¡chai caramba!")
+    
+    @commands.command()
+    async def weight(self, ctx: commands.Context):
+        if random.random() < 0.2:  # 20% chance to get 104.3 mwahaha
+            weight = 104.3
+        else:
+            # Generate random weight
+            weight = round(random.uniform(70, 250), 1)
+        await ctx.send(f"You've been weighed. You weight exactly {weight}lbs.")
 
     @commands.command()
     async def help(self, ctx: commands.Context):
@@ -42,7 +57,7 @@ class GeneralCog(commands.Cog):
     async def menu(self, ctx: commands.Context):
         if (
             ctx.channel.id == hc_constants.RESOURCES_CHANNEL
-            or hc_constants.BOT_TEST_CHANNEL
+            or ctx.channel.id == hc_constants.BOT_TEST_CHANNEL
         ):
             embed = discord.Embed(
                 title="Resources Menu",
