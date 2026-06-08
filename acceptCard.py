@@ -17,23 +17,24 @@ cardSheetUnapproved = googleClient.open_by_key(
 ).worksheet(hc_constants.DATABASE_UNAPPROVED)
 
 
-async def acceptCard(
+async def accept_card(
     bot: commands.Bot,
     cardMessage: str,
     file: discord.File,
     cardName: str,
     authorName: str,
-    channelIdForCard: int = hc_constants.HKL_CARD_LIST,
-    setId: str = "HKL",
+    channelIdForCard: int = hc_constants.NINE_CARD_LIST,
+    setId: str = "HC9.0",
     errata: bool = False,
     errataId: Optional[str] = None,
     wasVetoed: bool = False,
 ):
+    """Accept a cards a card into the DB. This also includes posting it to reddit and the appropriate card list channel."""
     extension = re.search("\.([^.]*)$", file.filename)
-    fileType = (
+    file_type = (
         extension.group() if extension else ".png"
     )  # just guess that the file is a png
-    new_file_name = f'{cardName.replace("/", "|")[:250]}{fileType}'
+    new_file_name = f'{cardName.replace("/", "|")[:250]}{file_type}'
     image_path = f"tempImages/{new_file_name}"
 
     file_data = file.fp.read()
@@ -41,8 +42,8 @@ async def acceptCard(
         fp=io.BytesIO(file_data), filename=new_file_name
     )
 
-    cardListChannel = cast(discord.TextChannel, bot.get_channel(channelIdForCard))
-    await cardListChannel.send(file=file_copy_for_cardlist, content=cardMessage)
+    card_list_channel = cast(discord.TextChannel, bot.get_channel(channelIdForCard))
+    await card_list_channel.send(file=file_copy_for_cardlist, content=cardMessage)
 
     with open(image_path, "wb") as out:
         out.write(file_data)
@@ -52,7 +53,7 @@ async def acceptCard(
             await post_to_reddit(
                 image_path=image_path,
                 title=f"{cardMessage.replace('**', '')} {'was accepted!' if not wasVetoed else 'was vetoed!'}",
-                flair=hc_constants.ACCEPTED_FLAIR,
+                flair=hc_constants.OFFICIAL_HC_REDDIT_FLAIR,
             )
         except Exception as e:
             print("tried to post to reddit", e)
@@ -74,7 +75,9 @@ async def acceptCard(
         if cardName == "":
             cardName = "NO NAME"
 
-    google_drive_file_id = uploadToDrive(image_path, image_id_to_update)
+    google_drive_file_id = uploadToDrive(
+        image_path, image_id_to_update, folder_id=hc_constants.CURRENT_SET_FOLDER
+    )
 
     os.remove(image_path)
 
@@ -94,7 +97,7 @@ async def acceptCard(
         )
 
 
-async def acceptVetoCard(
+async def accept_veto_card(
     bot: commands.Bot,
     cardMessage: str,
     file: discord.File,

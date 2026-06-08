@@ -37,10 +37,23 @@ async def getVetoPollsResults(bot: commands.Bot, ctx: commands.Context):
         "who? oh yeah sure thing b0ss",
         "how about nyaaaa for a change?",
         "CAAAAAAAAAAAAAAN DO!",
-        "i mean like, if you say so, man",
+        "i mean like, if you say so",
         "WOOOOOOOOOOOOOOOOOOOOOOOOOOOO",
         "*nuzzles u*",
         "it begins",
+        "more of that strange oil. it's probably nothing.",
+        "beep boop bop",
+        "wanna hear a secret?",
+        "i'm not actually processing, i'm just saying that to make you feel better.",
+        "███████▒▒▒ 70%",
+        "om nom nom. tasty cards.",
+        "bleh. these cards don't taste good.",
+        "at least ask me out to dinner first, geez.",
+        "fine... if i must",
+        "just doin my job",
+        "lemme grab my stabbing knife",
+        "this guy again?",
+        "its actually pronounced hell, not hell",
     ]
 
     await ctx.send(random.choice(epicCatchphrases))
@@ -53,6 +66,7 @@ async def getVetoPollsResults(bot: commands.Bot, ctx: commands.Context):
     messages = [message async for message in messages]
 
     errataCardMessages: list[Message] = []
+    judgeCardMessages: list[Message] = []
     acceptedCardMessages: list[Message] = []
     vetoCardMessages: list[Message] = []
     purgatoryCardMessages: list[Message] = []
@@ -81,6 +95,10 @@ async def getVetoPollsResults(bot: commands.Bot, ctx: commands.Context):
         )
         errata = erratas.count if erratas else -1
 
+        # Check for Judge react to pause the card
+        if get(messageEntry.reactions, emoji=bot.get_emoji(hc_constants.JUDGE_REACT)):
+            judgeCardMessages.append(messageEntry)
+
         # Errata needed case
         if errata > 4 and errata >= upvote and errata >= downvote:
             errataCardMessages.append(messageEntry)
@@ -103,6 +121,7 @@ async def getVetoPollsResults(bot: commands.Bot, ctx: commands.Context):
 
     return VetoPollResults(
         errataCardMessages=errataCardMessages,
+        judgeCardMessages=judgeCardMessages,
         acceptedCardMessages=acceptedCardMessages,
         vetoCardMessages=vetoCardMessages,
         purgatoryCardMessages=purgatoryCardMessages,
@@ -112,6 +131,7 @@ async def getVetoPollsResults(bot: commands.Bot, ctx: commands.Context):
 @dataclass
 class VetoPollResults:
     errataCardMessages: list[Message]
+    judgeCardMessages: list[Message]
     acceptedCardMessages: list[Message]
     vetoCardMessages: list[Message]
     purgatoryCardMessages: list[Message]

@@ -4,6 +4,8 @@ import aiohttp
 import discord
 from cardNameRequest import cardNameRequest
 import hc_constants
+
+FISH_FROM_GO_FISH_SEARCH = "the fish from go fish"
 from shared_vars import allCards
 from discord.message import Message
 
@@ -16,11 +18,17 @@ async def print_card_images(message: Message):
     requestedCards = []
     if len(message_text) > 10:
         await message.reply(
-            "Don't call more than 10 cards per message, final warning, keep trying and you get blacklisted from the bot. Blame dRafter for this if you're actually trying to use the bot."
+            "Don't call more than 10 cards per message, final warning, keep trying and you get blacklisted from the bot."
         )
         return
     for cardName in message_text:
-        requestedCards.append(cardNameRequest(cardName))
+        search_text = cardName
+        if (
+            message.author.id == hc_constants.LLLLLL
+            and cardName.strip() == "fish"
+        ):
+            search_text = FISH_FROM_GO_FISH_SEARCH
+        requestedCards.append(cardNameRequest(search_text))
     for post in requestedCards:
         if post == "":
             await message.reply("No Match Found!", mention_author=False)

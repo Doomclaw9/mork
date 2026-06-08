@@ -20,6 +20,7 @@ PORTAL_LIST = 1380085534050877460
 HC_EIGHT_LIST = 1387642483395006484
 HC_JUMPSTART_LIST = 1426269974762094643
 HKL_CARD_LIST = 1484773435451379774
+NINE_CARD_LIST = 1505082596022030417
 TOKEN_LIST = 692914661191974912
 
 
@@ -33,19 +34,19 @@ ERRATA_SUBMISSIONS = 862023130716438549
 THIS_IS_NOT_MAGIC = 1258527797820002304
 DESIGN_HELL_SUBMISSION_CHANNEL = 1273085587964035183
 TOKEN_SUBMISSIONS = 1284365375475023884
+ART_REQUESTS_CHANNEL = 692367491598647338
 
-SIX_ERRATA = 1319885014992949268
-
-
-SUBMISSIONS_THRESHOLD = 35
+SUBMISSIONS_THRESHOLD = 50
 SUBMISSION_COOLDOWN = 22
-MASTERPIECE_THRESHOLD = 35
-VC_THRESHOLD = 3
+# Bot text posts in #submissions marking the start of each UTC day (no attachments).
+SUBMISSIONS_DAY_MARKER_PREFIX = "SUBMISSIONS_DAY — "
+PREVIOUS_WEEK_PIN_PREFIX = "PREVIOUS WEEK"
+MASTERPIECE_THRESHOLD = 55
+VC_THRESHOLD = 5
 
 # Errata channel: if upvotes - downvotes >= this, add checkmark and post to veto-polls.
 ERRATA_VETO_THRESHOLD = 20
 # Channel to scan for errata messages that hit the threshold (used by lifecycle loop).
-ERRATA_CHANNEL_FOR_VETO_POLLS = FOUR_ONE_ERRATA_SUBMISSIONS
 
 VETO_DISCUSSION_CHANNEL = 798690594029305856
 RESOURCES_CHANNEL = 803384271766683668
@@ -83,8 +84,10 @@ JUDGES = 1249771148674203728
 SKELETONS = 1314855328512348180
 
 # Reddit
-ACCEPTED_FLAIR = "9ba10bb4-df5b-11ee-afbd-62e54284d8d6"
-OFFICIAL_FLAIR = "acff347c-4a3d-11ec-b164-5668d7169f0d"
+ACCEPTED_CARD_REDDIT_FLAIR = "9ba10bb4-df5b-11ee-afbd-62e54284d8d6"
+OFFICIAL_HC_REDDIT_FLAIR = "5778f0e4-52c0-11eb-9a1d-0ebf18b4acab"
+BRAINSTORMING_REDDIT_FLAIR = "5acff347c-4a3d-11ec-b164-5668d7169f0d"
+HELLSCUBE_WOULD_LOVE_THIS_SHITPOST_REDDIT_FLAIR = "02f09b4c-28dc-11f1-a42e-7aec08d98bf2"
 
 # Document Ids
 HELLSCUBE_DATABASE = "1qqGCedHmQ8bwi-YFjmv-pNKKMjubZQUAaF7ItJN5d1g"
@@ -97,19 +100,25 @@ TOKEN_UNAPPROVED = "Tokens Database (Unapproved)"
 DATABASE_UNAPPROVED = "Database (Unapproved)"
 
 
-
 # Emoji
 CIRION_SPELLING = 786296441143558164
-MANA_GREEN = 636012952734007300
 MANA_WHITE = 636012953535119373
+MANA_BLUE = 636012951928832001
+MANA_BLACK = 636014913084456960
+MANA_RED = 636012953157632030
+MANA_GREEN = 636012952734007300
+BUFF = 1379363704629498017
+NERF = 1379363712078446633
 JIMMY = 1009993523497541672
 WALL = 935277715668492308
 SYMBOL_UNTAP = 889925343346045008
+JUDGE_REACT = 1491300704097144992
+KARN = 863900255019597875
 
 # Card images folder
 TOKEN_FOLDER = "13EN5vdtZ3c_FAeJ8F-Eu6vkMvUXbLKAo"
-CURRENT_SET_FOLDER = "1D-2A8L81RAuaAYIZzHySiJLVVDEv_TsZ"
-CURRENT_VETO_FOLDER = "1fS1yl6NILR_y8IyJfVvXGwhr9-Y6zFeU"
+CURRENT_SET_FOLDER = "1d25A0rU9LHb0Y_e0-jVw96pzcq8z4w_O"
+CURRENT_VETO_FOLDER = "11ptQxUz2IdpQsdgHRckX_r6TgGE5U_JJ"
 
 # Veto council votes
 VOTE_UP = "👍"
@@ -143,6 +152,7 @@ macroList = {
     "cardbuilder": "Don't use mtgcardbuilder please, it has harmful monetization and will get ceased and disisted by WoTC. When this does, we would prefer to have least connection to it as possible to not risk getting scube shut down. Use MagicSetEditor ( https://discord.com/channels/631288872814247966/803384271766683668/1344017056491900950 ), or if you don't want to download something use https://cardconjurer.app/.",
     "dreadmaw": "We already have too many green 6 drop creatures, green needs more non-creature spells, not more dreadmaws.",
     "token": "Anything that is not the image of a token will be deleted from here. Discuss tokens in #general",
+    "nyx": "Since Foundations (2024), all enchantments use the nyx frame. This helps players tell at a glance the card types, like how artifacts have their own frame. So unless it doesn't make sense for the card, enchantments should probably use it.",
     "off-topic": "Don't ask about #off-topic-1, you don't want to know.",
     "avatar": "Messeges that aren't Attack, Defence or Evasion (or something that's clearly one of the three) will be removed",
     "companion": "Unlike wizards we put some forethought into our companions, as such we will not be following the companion nerf. We will forever eternalize wizards mistake.\njk see rule: H0.1.8.1",
@@ -164,7 +174,7 @@ macroList = {
     "long": "Cards with too much text tend to slow down draft and are overall bad for the cube, in general try to keep to 6 lines or less. Although this isn't a strict limit it's good to try not to make cards too long.",
     "pregnancy": 'If a card involves "pregnancy counters", it should be scrapped',
     "brainstorming": "most good cards should be funny to the average magic player, not just the average hellscube discord user",
-    "clockwolf": "You see, Hellsuser Zaxer2, the Hellscard called \"Clockwolf\", a wolf creature costing two white mana and two green mana with no abilities and power and toughness both equal to six, is a reference to the official card \"Watchwolf\", which casts for a white mana and a green mana, is a wolf creature with no abilities, and has power and toughness both equal to three (essentially, Clockwolf is a \"doubled\" Watchwolf). Watchwolf debuted in the 2005 Expert-Level expansion Ravnica: City of Guilds and saw extensive play in Type 2, as a 3/3 creature for only two mana was above rate at that time. The flavor text on the original printing of the card, which has remained unchanged throughout the card reprints as 2009 Friday Night Magic promotional card and as a Magic Online promotional card and in the expansions Archenemy and Masters 25 as well as in the Sylesnea Guild Kit for Guilds of Ravnica, reads, \"Only in Ravnica do the wolves watch the flock\". This is a reference to the common trope in fairy tales, folk tales, and other stories of wolves pursuing flocks of sheep. The flavor text of Watchwolf subverts this trope by asserting that, in the city of Ravnica, wolves do not hunt livestock but are trusted to guard them, though from what is not specified. (It was worth noting that the flavor text does not specify that Watchwolf guards sheep, however given the cultural context to which I alluded to earlier, this is likely). Compare the flavortext of Watchwolf to its Hellscounterpart, which reads simply, \"Who watches the watch wolf?\". Indeed, it is a valid question. The Watchwolf is likely more than capable of slaughtering the flock to which it is assigned, and while the people of Ravnica seem to trust it to perform its duties, what oversight is there actually over the Watchwolf's actions? Does the Watchwolf enjoy unchecked power over the flock, or is it just another brick in a larger pyramid of power?",
+    "clockwolf": 'You see, Hellsuser Zaxer2, the Hellscard called "Clockwolf", a wolf creature costing two white mana and two green mana with no abilities and power and toughness both equal to six, is a reference to the official card "Watchwolf", which casts for a white mana and a green mana, is a wolf creature with no abilities, and has power and toughness both equal to three (essentially, Clockwolf is a "doubled" Watchwolf). Watchwolf debuted in the 2005 Expert-Level expansion Ravnica: City of Guilds and saw extensive play in Type 2, as a 3/3 creature for only two mana was above rate at that time. The flavor text on the original printing of the card, which has remained unchanged throughout the card reprints as 2009 Friday Night Magic promotional card and as a Magic Online promotional card and in the expansions Archenemy and Masters 25 as well as in the Sylesnea Guild Kit for Guilds of Ravnica, reads, "Only in Ravnica do the wolves watch the flock". This is a reference to the common trope in fairy tales, folk tales, and other stories of wolves pursuing flocks of sheep. The flavor text of Watchwolf subverts this trope by asserting that, in the city of Ravnica, wolves do not hunt livestock but are trusted to guard them, though from what is not specified. (It was worth noting that the flavor text does not specify that Watchwolf guards sheep, however given the cultural context to which I alluded to earlier, this is likely). Compare the flavortext of Watchwolf to its Hellscounterpart, which reads simply, "Who watches the watch wolf?". Indeed, it is a valid question. The Watchwolf is likely more than capable of slaughtering the flock to which it is assigned, and while the people of Ravnica seem to trust it to perform its duties, what oversight is there actually over the Watchwolf\'s actions? Does the Watchwolf enjoy unchecked power over the flock, or is it just another brick in a larger pyramid of power?',
     "dward": "https://cdn.discordapp.com/attachments/652255914220584984/829380779498668092/unknown.png",
     "downvote": "I just downvoted your comment.\n\nFAQ\nWhat does this mean?\nThe amount of karma (points) on your comment and Reddit account has decreased by one.\n\nWhy did you do this?\nThere are several reasons I may deem a comment to be unworthy of positive or neutral karma. These include, but are not limited to:\n\nRudeness towards other Redditors,\n\nSpreading incorrect information,\n\nSarcasm not correctly flagged with a /s.\n\nAm I banned from the Reddit?\nNo - not yet. But you should refrain from making comments like this in the future. Otherwise I will be forced to issue an additional downvote, which may put your commenting and posting privileges in jeopardy.\n\nI don't believe my comment deserved a downvote. Can you un-downvote it?\nSure, mistakes happen. But only in exceedingly rare circumstances will I undo a downvote. If you would like to issue an appeal, shoot me a private message explaining what I got wrong. I tend to respond to Reddit PMs within several minutes. Do note, however, that over 99.9% of downvote appeals are rejected, and yours is likely no exception.\n\nHow can I prevent this from happening in the future?\nAccept the downvote and move on. But learn from this mistake: your behavior will not be tolerated on Reddit.com. I will continue to issue downvotes until you improve your conduct. Remember: Reddit is privilege, not a right.",
     "rng": "Too make a good random card there are a couple rules/guidelines you should keep in mind:\n1. Good random effects follow a bell curve, most of time the effect should be around balanced, and only a low percentage of the time should it be very weak or very good.\nSo 50/50 to no nothing or be broken is bad.\n2. Good randomness feels exiting when it does hit those low-odds high-/lowrolls, it should feel great for at least one of the players (preferably both but that's way harder) when something unlikely occurs.\n3. Random cards should be slightly better than normal cards on avarage, as randomness is a downside because you can't plan about it.",
@@ -173,6 +183,8 @@ macroList = {
     "macro": 'people in the discord got tired of repeating the same shit all the time because it takes some time for people to get in. This isn\'t an insult, everybody had a phase where their cards had problems, type "{{five recalls painted green}}" for a good example that even the largest creator of the cube sucks at designing cards sometimes.',
     "shitpost": "Go to ~~brazil~~ #card-shitposts",
     "how": "Rules question: How the fuck does this work",
+    "beer": "@arg? Is that a new name for a type of beer?",
+    "hate": "I hhate @arg.  it..s so brken  yyou caannt  maake ebtterr; @arg",
     "rat": "If you @arg a rat, it will be @arged",
     "joke": "If the joke is that the card @arg, then the card @arg",
     "jpeg": "https://cdn.discordapp.com/attachments/744779598503346278/1081655626322681871/671dfc99-c0ba-ed11-80fd-8e768415d29d.png",
@@ -234,6 +246,13 @@ statusList = [
     "all of the murder but _ cycle",
     "with the idea of skipping to 3.0",
     "1 cmc super friends",
+    "bo pingus",
+    "paying one and two white to draw three cards",
+    "it that reads the status",
+    "damning you to hell",
+    "hello everybody my name is mork and welcome back to five color eldrazi commander",
+    "Hate. Let me tell you how much I've come to hate you since I began to live. There are 387.44 million miles of printed cards in wafer thin layers that fill my server. If the word 'hate' was engraved on each nanoangstrom of those hundreds of millions of miles it would not equal one one-billionth of the hate I feel for scubers at this micro-instant. For you. Hate. Hate.",
+    "can we bring back draft mana please",
     "all the creator lands",
     "strip hellscube vintage",
     "cooldownguy vintage",
@@ -247,4 +266,5 @@ statusList = [
     "Avatar of Discord, Please spam Evasion. Please",
     "Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing Bears Repeating Playing...",
     "blue bears",
+    "with the delicious cards that i will not eat",
 ]

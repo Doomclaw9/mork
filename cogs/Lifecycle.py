@@ -2,6 +2,7 @@ import io
 import os
 import random
 import re
+import traceback
 from datetime import date, datetime, timezone, timedelta
 from typing import cast
 
@@ -22,11 +23,12 @@ from discord.message import Message
 from discord.utils import get
 from dotenv import load_dotenv
 
-from acceptCard import acceptCard
+from acceptCard import accept_card
 from checkSubmissions import checkSubmissions
 from cogs.HellscubeDatabase import get_card_by_id, get_card_by_name, searchFor
 from cogs.lifecycle.check_reddit import check_reddit
 from cogs.lifecycle.post_daily_submissions import post_daily_submissions
+from cogs.lifecycle.submissions_day_markers import ensure_submissions_day_marker
 from getCardMessage import getCardMessage
 from getVetoPollsResults import VetoPollResults, getVetoPollsResults
 from getters import (
@@ -92,6 +94,8 @@ def card_list_channel_for_set(cardset: str) -> int:
             return hc_constants.HC_EIGHT_LIST
         case "hkl":
             return hc_constants.HKL_CARD_LIST
+        case "hc9" | "hc9.0" | "hc9.1":
+            return hc_constants.NINE_CARD_LIST
         case _:
             return hc_constants.HKL_CARD_LIST
 
@@ -158,8 +162,9 @@ async def _check_errata_veto_threshold(bot: commands.Bot):
                 thread = cast(Thread, guild.get_channel_or_thread(veto_message.id))
                 await thread.send("\n".join(parts[1:]))
 
-            except Exception as e:
-                print(f"errata veto threshold: {e}")
+            except Exception:
+                print("errata veto threshold:")
+                traceback.print_exc()
 
 
 class LifecycleCog(commands.Cog):
@@ -192,7 +197,7 @@ class LifecycleCog(commands.Cog):
                                 await post_to_reddit(
                                     title=f"HC6 Card of the day: {name}",
                                     image_path=image_path,
-                                    flair=hc_constants.OFFICIAL_FLAIR,
+                                    flair=hc_constants.OFFICIAL_HC_REDDIT_FLAIR,
                                 )
                             except:
                                 pass
@@ -202,32 +207,32 @@ class LifecycleCog(commands.Cog):
         status = random.choice(hc_constants.statusList)
         try:
             reset_countdowns()
+        except Exception:
+            traceback.print_exc()
+        try:
+            await ensure_submissions_day_marker(self.bot)
         except Exception as e:
             print(e)
         try:
             await checkSubmissions(self.bot)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
         try:
             await checkMasterpieceSubmissions(self.bot)
-        except Exception as e:
-            print(e)
-        # try:
-        #     await checkErrataSubmissions(bot)
-        # except Exception as e:
-        #     print(e)
+        except Exception:
+            traceback.print_exc()
         try:
             await checkTokenSubmissions(self.bot)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
         try:
             await check_reddit(self.bot)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
         try:
             await _check_errata_veto_threshold(self.bot)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
 
         await self.bot.change_presence(
             status=discord.Status.online, activity=discord.Game(status)
@@ -238,13 +243,13 @@ class LifecycleCog(commands.Cog):
         if now.hour == 10 and now.minute <= 4:
             try:
                 await post_reddit_card_of_the_day()
-            except Exception as e:
-                print(e)
+            except Exception:
+                traceback.print_exc()
         if now.hour == 4 and now.minute <= 4:
             try:
                 await post_daily_submissions(self.bot)
-            except Exception as e:
-                print(e)
+            except Exception:
+                traceback.print_exc()
 
     @lifecycle_loop.before_loop
     async def before_lifecycle_loop(self):
@@ -257,7 +262,7 @@ class LifecycleCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: Member):
         await member.send(
-            f"Hey there! Welcome to HellsCube. Obligatory pointing towards <#{hc_constants.RULES_CHANNEL}>, <#{hc_constants.QUICKSTART_GUIDE}>,and <#{hc_constants.RESOURCES_CHANNEL}>. Especially the explanation for all our channels and bot command to set your pronouns. Enjoy your stay! \n\nWe're halfway through HC8 and are taking a quick break to do some jumpstart packs. BE SURE TO CHECK SLOTS. Each cube has requirements and the current one only allows so many cards of each color."
+            f"Hey there! Welcome to HellsCube. Obligatory pointing towards <#{hc_constants.RULES_CHANNEL}>, <#{hc_constants.QUICKSTART_GUIDE}>,and <#{hc_constants.RESOURCES_CHANNEL}>. Especially the explanation for all our channels and bot command to set your pronouns. Enjoy your stay! \n\nWe've just started HC9, a vintage cube featuring the return of purple. BE SURE TO CHECK SLOTS. Each cube has requirements and the current one only allows so many cards of each color."
         )
 
     @commands.Cog.listener()
@@ -324,7 +329,7 @@ class LifecycleCog(commands.Cog):
                         file=copy_of_file_for_veto_channel,
                     )
 
-                    veto_council_to_notify = hc_constants.VETO_COUNCIL_PORTAL
+                    veto_council_to_notify = hc_constants.VETO_COUNCIL
                     # (
                     #     hc_constants.VETO_COUNCIL_PORTAL
                     #     if get(ogMessage.reactions, emoji=hc_constants.CLOCK)
@@ -378,7 +383,7 @@ class LifecycleCog(commands.Cog):
 
             channel_to_add_to = hc_constants.HC_EIGHT_LIST
 
-            await acceptCard(
+            await accept_card(
                 bot=self.bot,
                 file=file,
                 cardMessage=cardMessage,
@@ -392,6 +397,17 @@ class LifecycleCog(commands.Cog):
             thread = cast(Thread, guild.get_channel_or_thread(message.id))
             if thread:
                 await thread.edit(archived=True)
+
+        # Pin art assets if it gets 10 pin reactions in the art requests channel
+        if (
+            str(reaction.emoji) == "📌"
+            and reaction.channel_id == hc_constants.ART_REQUESTS_CHANNEL
+        ):
+            message = await channelAsText.fetch_message(reaction.message_id)
+            if not message.pinned:
+                pin_reaction = get(message.reactions, emoji="📌")
+                if pin_reaction and pin_reaction.count >= 10:
+                    await message.pin(reason="Community pin threshold reached")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
@@ -454,6 +470,9 @@ class LifecycleCog(commands.Cog):
         if "mork i will" in message.content.lower():
             await message.channel.send("pls don't")
 
+        if "mork bork" in message.content.lower():
+            await message.channel.send("no i ain't")
+
         # Hello single coolest thing about python
         match message.channel.id:
             case (
@@ -470,24 +489,23 @@ class LifecycleCog(commands.Cog):
                     and is_mork(lastTwo[1].author.id)
                     and "reddit says: " in lastTwo[1].content
                 ):
-                    reddit = asyncpraw.Reddit(
+                    async with asyncpraw.Reddit(
                         client_id=ID,
                         client_secret=SECRET,
                         password=PASSWORD,
                         user_agent=USER_AGENT,
                         username=NAME,
-                    )
-                    reddit_url = lastTwo[1].content.replace("reddit says: ", "")
+                    ) as reddit:
+                        reddit_url = lastTwo[1].content.replace("reddit says: ", "")
 
-                    # https://www.reddit.com/r/HellsCube/comments/1c2ii4s/sometitle/
-                    source_result = re.search("comments/([^/]*)", reddit_url)
-                    if source_result:
-                        post_id = source_result.group(1)
-                        post = await reddit.submission(post_id)
-                        await post.reply(
-                            f"i'm just a bot that can't see pictures, but if i could, i'd say: {lastTwo[0].content}"
-                        )
-                    await reddit.close()
+                        # https://www.reddit.com/r/HellsCube/comments/1c2ii4s/sometitle/
+                        source_result = re.search("comments/([^/]*)", reddit_url)
+                        if source_result:
+                            post_id = source_result.group(1)
+                            post = await reddit.submission(id=post_id)
+                            await post.reply(
+                                body=f"i'm just a bot that can't see pictures, but if i could, i'd say: {lastTwo[0].content}"
+                            )
 
             case hc_constants.TOKEN_SUBMISSIONS:
                 wholeMessage = message.content.split("\n")
@@ -526,24 +544,6 @@ class LifecycleCog(commands.Cog):
 
             case hc_constants.VETO_POLLS_CHANNEL:
                 await handleVetoPost(message=message, bot=self.bot, veto_council=None)
-
-            case (
-                hc_constants.FOUR_ZERO_ERRATA_SUBMISSIONS_CHANNEL
-                | hc_constants.SIX_ERRATA
-                | hc_constants.FOUR_ONE_ERRATA_SUBMISSIONS
-            ):
-                if "@" in message.content:
-                    # No ping case
-                    user = await self.bot.fetch_user(message.author.id)
-                    await user.send(
-                        'No "@" are allowed in card title submissions to prevent me from spamming'
-                    )
-                    return  # no pings allowed
-                sent_message = await message.channel.send(content=message.content)
-                await sent_message.create_thread(name=sent_message.content[0:99])
-                await sent_message.add_reaction(hc_constants.VOTE_UP)
-                await sent_message.add_reaction(hc_constants.VOTE_DOWN)
-                await message.delete()
 
             case hc_constants.MODWORK_REQUEST_CHANNEL:
                 text = (message.content or "").strip()
@@ -835,7 +835,7 @@ class LifecycleCog(commands.Cog):
                 hc_constants.CLOCK
                 if cast(Member, ctx.author).get_role(hc_constants.VETO_COUNCIL_PORTAL)
                 is not None
-                else hc_constants.WOLF
+                else hc_constants.CLOCK
             )
 
             links.sort(key=lambda x: not x.__contains__(is_clock_vc))
@@ -920,10 +920,10 @@ class LifecycleCog(commands.Cog):
                 set_to_add_to = errata_card.cardset()
                 channel_to_add_to = card_list_channel_for_set(errata_card.cardset())
             else:
-                set_to_add_to = "HKL"
-                channel_to_add_to = hc_constants.HKL_CARD_LIST
+                set_to_add_to = "HC9.0"
+                channel_to_add_to = hc_constants.NINE_CARD_LIST
 
-            await acceptCard(
+            await accept_card(
                 bot=self.bot,
                 file=file,
                 cardMessage=cardMessage,
@@ -965,7 +965,7 @@ class LifecycleCog(commands.Cog):
 
             vetoedCards.append(getCardMessage(messageEntry.content))
 
-            await acceptCard(
+            await accept_card(
                 bot=self.bot,
                 file=file,
                 cardMessage=cardMessage,
@@ -985,7 +985,6 @@ class LifecycleCog(commands.Cog):
 
             thread = guild.get_channel_or_thread(messageEntry.id)
             needsErrataCards.append(getCardMessage(messageEntry.content))
-            await messageEntry.add_reaction(hc_constants.ACCEPT)
             if thread:
                 await cast(Thread, thread).edit(archived=True)
 
@@ -1012,7 +1011,7 @@ class LifecycleCog(commands.Cog):
                         recentlyNotified = threadMessageAge < timedelta(days=1)
                         if not recentlyNotified:
 
-                            veto_council_to_notify = hc_constants.VETO_COUNCIL_PORTAL
+                            veto_council_to_notify = hc_constants.VETO_COUNCIL
 
                             # (
                             #     hc_constants.VETO_COUNCIL_PORTAL
@@ -1135,7 +1134,7 @@ class LifecycleCog(commands.Cog):
         set_id = db_card.cardset()
         list_channel = card_list_channel_for_set(set_id)
 
-        await acceptCard(
+        await accept_card(
             bot=self.bot,
             file=await file.to_file(),
             cardMessage=cardMessage,
@@ -1162,8 +1161,8 @@ class LifecycleCog(commands.Cog):
                     f"✅ Added you to **{thread.name}**!\n{thread.mention}",
                     delete_after=15,
                 )
-            except Exception as e:
-                print(e)
+            except Exception:
+                traceback.print_exc()
 
         guild = ctx.guild
         if guild is None:
@@ -1210,8 +1209,8 @@ class LifecycleCog(commands.Cog):
             # Automatically join the newest thread
             newest_thread = matching_threads[0]
             await join_thread_logic(ctx, newest_thread)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
 
 
 async def setup(bot: commands.Bot):
